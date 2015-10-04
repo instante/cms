@@ -2,6 +2,8 @@
 
 namespace Instante\CMS\DI;
 
+use Instante\CMS\Latte\EditorMacros;
+use Kdyby\Doctrine\DI\IEntityProvider;
 use Nette\Configurator;
 use Nette\DI\Compiler;
 use Symfony\Component\Console\Output\ConsoleOutput;
@@ -10,7 +12,7 @@ use Nette\DI\CompilerExtension;
 /**
  * Instante CMS content editor
  */
-class EditorExtension extends CompilerExtension
+class EditorExtension extends CompilerExtension implements IEntityProvider
 {
     const DEFAULT_EXTENSION_NAME = 'instante.cms.editor';
 
@@ -25,30 +27,24 @@ class EditorExtension extends CompilerExtension
     {
         /*
          * TODO
-         * - register model facade
-         * - register latte macros (for now, icms-text)
          * - add route to editor persistence presenter to router
          * - register js into js module container if js module container is present
          */
-        $builder = $this->getContainerBuilder();
+        $this->registerFacadeService();
+        $this->registerLatteMacros();
+    }
 
-        $consoleOutput = $builder->addDefinition($this->prefix('consoleOutput'))
-            ->setClass('Doctrine\DBAL\Migrations\OutputWriter')
-            ->setFactory(get_called_class() . '::createConsoleOutput')
-            ->setAutowired(FALSE);
+    private function registerFacadeService() {
+        $this->getContainerBuilder()->addDefinition($this->prefix('editableFacade'))
+            ->setClass('Instante\\CMS\\Editor\\EditableFacade');
+    }
 
-        $configuration = $builder->addDefinition($this->prefix('configuration'))
-            ->setClass('Doctrine\DBAL\Migrations\Configuration\Configuration', array(
-                $consoleOutput,
-            ))
-            ->addSetup('setMigrationsTableName', array($config['table']))
-            ->addSetup('setMigrationsDirectory', array($config['directory']))
-            ->addSetup('setMigrationsNamespace', array($config['namespace']))
-            ->addSetup('registerMigrationsFromDirectory', array($config['directory']));
-
-        if (isset($config['console']) && $config['console']) {
-            $this->processConsole($configuration);
-        }
+    private function registerLatteMacros()
+    {
+        $this->getContainerBuilder()
+            ->getDefinition('latte.latteFactory')
+            ->addSetup('?->onCompile[] = function() use (?) { ' . EditorMacros::class
+                . '::install(?->getCompiler()); }', array('@self', '@self', '@self'));
     }
 
     /**
@@ -63,6 +59,16 @@ class EditorExtension extends CompilerExtension
         $configurator->onCompile[] = function (Configurator $configurator, Compiler $compiler) use ($class, $name) {
             $compiler->addExtension($name, new $class);
         };
+    }
+
+    /**
+     * Returns associative array of Namespace => mapping definition
+     *
+     * @return array
+     */
+    function getEntityMappings()
+    {
+        return ['Instante\\CMS\\Model' => __DIR__ . '/../Model'];
     }
 }
 

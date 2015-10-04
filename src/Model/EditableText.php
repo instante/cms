@@ -4,17 +4,21 @@ namespace Instante\CMS\Model;
 
 use Doctrine\ORM\Mapping as ORM;
 
+/**
+ * @ORM\Entity
+ * @ORM\Table(name="icms_editable_text")
+ */
 final class EditableText
 {
     /**
      * @ORM\Id
-     * @ORM\Column(type="text")
+     * @ORM\Column(type="string", length=50)
      * @var string
      */
     private $ident = NULL;
 
     /**
-     * @ORM\Column(type="text", nullable="true")
+     * @ORM\Column(type="text", nullable=true)
      * @var string
      */
     private $text = NULL;

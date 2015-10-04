@@ -5,10 +5,6 @@ Instante UI
 [![Downloads this Month](https://img.shields.io/packagist/dm/instante/cms.svg)](https://packagist.org/packages/instante/cms)
 [![Latest stable](https://img.shields.io/packagist/v/instante/cms.svg)](https://packagist.org/packages/instante/cms)
 
-Requirements
-------------
-
-- PHP 5.4 or higher
 
 
 Installation
