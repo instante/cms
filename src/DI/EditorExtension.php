@@ -12,9 +12,11 @@ use Nette\DI\CompilerExtension;
 /**
  * Instante CMS content editor
  */
-class EditorExtension extends CompilerExtension implements IEntityProvider
+final class EditorExtension extends CompilerExtension implements IEntityProvider
 {
     const DEFAULT_EXTENSION_NAME = 'instante.cms.editor';
+
+    const EDITABLE_FACADE_SERVICE = 'editableFacade';
 
     public $defaultName = NULL;
 
@@ -25,17 +27,24 @@ class EditorExtension extends CompilerExtension implements IEntityProvider
      */
     public function loadConfiguration()
     {
-        /*
-         * TODO
-         * - add route to editor persistence presenter to router
-         * - register js into js module container if js module container is present
-         */
         $this->registerFacadeService();
         $this->registerLatteMacros();
+        $this->addPresenterRoute();
+        $this->registerJSModule();
+    }
+
+    private function addPresenterRoute()
+    {
+        //TODO add route to editor persistence presenter to router
+    }
+
+    private function registerJSModule()
+    {
+        //TODO register js into js module container if js module container is present
     }
 
     private function registerFacadeService() {
-        $this->getContainerBuilder()->addDefinition($this->prefix('editableFacade'))
+        $this->getContainerBuilder()->addDefinition($this->prefix(self::EDITABLE_FACADE_SERVICE))
             ->setClass('Instante\\CMS\\Editor\\EditableFacade');
     }
 
@@ -44,7 +53,14 @@ class EditorExtension extends CompilerExtension implements IEntityProvider
         $this->getContainerBuilder()
             ->getDefinition('latte.latteFactory')
             ->addSetup('?->onCompile[] = function() use (?) { ' . EditorMacros::class
-                . '::install(?->getCompiler()); }', array('@self', '@self', '@self'));
+                . '::install(?); }', array('@self', '@self', '@self'))
+            ->addSetup('addFilter', [
+                EditorMacros::EDITABLE_TEXT_RESOLVER_FILTER,
+                [$this->prefix('@'.self::EDITABLE_FACADE_SERVICE), 'getText']
+            ]);
+        $this->getContainerBuilder()
+            ->addDefinition($this->prefix('editorFacade'))
+            ->setClass('Instante\CMS\Editor\EditableFacade');
     }
 
     /**
