@@ -1,6 +1,6 @@
 <?php
 
-namespace InstanteTests\CMS;
+namespace Instante\Tests\CMS\DI;
 
 
 use Instante\CMS\DI\EditorExtension;
