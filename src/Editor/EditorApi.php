@@ -11,20 +11,21 @@ namespace Instante\CMS\Editor;
 
 use Kdyby\Doctrine\EntityManager;
 use Nette\Application\BadRequestException;
+use Nette\Application\IResponse;
+use Nette\Application\Request;
+use Nette\Application\Responses\JsonResponse;
 use Nette\Application\Responses\TextResponse;
+use Nette\Http\IRequest;
+use NetteModule\MicroPresenter;
 
 final class EditorApi
 {
-    /** @var EntityManager */
-    private $em;
+    /** @var IEditableFacade */
+    private $editableFacade;
 
-    /**
-     * EditorApi constructor.
-     * @param EntityManager $em
-     */
-    private function __construct(EntityManager $em = NULL)
+    private function __construct(IEditableFacade $editableFacade = NULL)
     {
-        $this->em = $em;
+        $this->editableFacade = $editableFacade;
     }
 
     /**
@@ -36,14 +37,18 @@ final class EditorApi
     public static function getEntryPoint()
     {
         return function (
-            EntityManager $em,
+            IEditableFacade $editableFacade,
             $action,
             $presenter
+            // presenter arg type intentionally not present there, as this function's args are built with autowiring
+            // and the presenter is automatically added as last argument. Specifying MicroPresenter type results
+            // in conflict with autowiring mechanism.
         ) {
+            /** @var MicroPresenter $presenter */
             $params = $presenter->getRequest()->getParameters();
             unset($params['callback']);
             unset($params['action']);
-            $api = new self($em);
+            $api = new self($editableFacade);
             return $api->dispatch($action, $params);
         };
     }
@@ -54,11 +59,21 @@ final class EditorApi
         if (!method_exists($this, $actionMethod)) {
             throw new BadRequestException;
         }
-        return $this->$actionMethod($params);
+        $response = $this->$actionMethod($params);
+        if ($response instanceof IResponse) {
+            return $response;
+        }
+        if (is_string($response)) {
+            return new TextResponse($response);
+        }
+        if (is_array($response)) {
+            return new JsonResponse($response);
+        }
+        throw new \Exception('unknown response type');
     }
 
-    private function actionSave($params)
+    private function actionLoad($params)
     {
-        return new TextResponse('foo');
+        return new TextResponse($this->editableFacade->getText($params['ident']));
     }
 }

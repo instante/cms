@@ -6,6 +6,11 @@ use Instante\CMS\Model\EditableText;
 use Kdyby\Doctrine\EntityManager;
 use Kdyby\Doctrine\EntityRepository;
 
+/**
+ * Service for storing/retrieving user editable texts.
+ * @todo integration tests
+ * @package Instante\CMS\Editor
+ */
 class EditableFacade implements IEditableFacade
 {
     /** @var EntityManager */
