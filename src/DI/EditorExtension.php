@@ -2,8 +2,12 @@
 
 namespace Instante\CMS\DI;
 
+use Instante\CMS\Editor\EditorApi;
 use Instante\CMS\Latte\EditorMacros;
 use Kdyby\Doctrine\DI\IEntityProvider;
+use Nette\Application\IRouter;
+use Nette\Application\Routers\Route;
+use Nette\Application\Routers\RouteList;
 use Nette\Configurator;
 use Nette\DI\Compiler;
 use Symfony\Component\Console\Output\ConsoleOutput;
@@ -29,13 +33,16 @@ final class EditorExtension extends CompilerExtension implements IEntityProvider
     {
         $this->registerFacadeService();
         $this->registerLatteMacros();
-        $this->addPresenterRoute();
         $this->registerJSModule();
     }
 
-    private function addPresenterRoute()
+    /**
+     * @param string url prefix for the route
+     * @return IRouter
+     */
+    public static function createRoute($prefix = 'icms-api')
     {
-        //TODO add route to editor persistence presenter to router
+        return new Route($prefix.'[/<action>]', EditorApi::getEntryPoint());
     }
 
     private function registerJSModule()
