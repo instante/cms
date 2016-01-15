@@ -7,10 +7,8 @@ use Instante\CMS\Latte\EditorMacros;
 use Kdyby\Doctrine\DI\IEntityProvider;
 use Nette\Application\IRouter;
 use Nette\Application\Routers\Route;
-use Nette\Application\Routers\RouteList;
 use Nette\Configurator;
 use Nette\DI\Compiler;
-use Symfony\Component\Console\Output\ConsoleOutput;
 use Nette\DI\CompilerExtension;
 
 /**
@@ -42,7 +40,7 @@ final class EditorExtension extends CompilerExtension implements IEntityProvider
      */
     public static function createRoute($prefix = 'icms-api')
     {
-        return new Route($prefix.'[/<action>]', EditorApi::getEntryPoint());
+        return new Route($prefix . '[/<action>]', EditorApi::getEntryPoint());
     }
 
     private function registerJSModule()
@@ -50,7 +48,8 @@ final class EditorExtension extends CompilerExtension implements IEntityProvider
         //TODO register js into js module container if js module container is present
     }
 
-    private function registerFacadeService() {
+    private function registerFacadeService()
+    {
         $this->getContainerBuilder()->addDefinition($this->prefix(self::EDITABLE_FACADE_SERVICE))
             ->setClass('Instante\\CMS\\Editor\\EditableFacade');
     }
@@ -63,7 +62,7 @@ final class EditorExtension extends CompilerExtension implements IEntityProvider
                 . '::install(?); }', array('@self', '@self', '@self'))
             ->addSetup('addFilter', [
                 EditorMacros::EDITABLE_TEXT_RESOLVER_FILTER,
-                [$this->prefix('@'.self::EDITABLE_FACADE_SERVICE), 'getText']
+                [$this->prefix('@' . self::EDITABLE_FACADE_SERVICE), 'getText'],
             ]);
         $this->getContainerBuilder()
             ->addDefinition($this->prefix('editorFacade'))
@@ -89,7 +88,7 @@ final class EditorExtension extends CompilerExtension implements IEntityProvider
      *
      * @return array
      */
-    function getEntityMappings()
+    public function getEntityMappings()
     {
         return ['Instante\\CMS\\Model' => __DIR__ . '/../Model'];
     }

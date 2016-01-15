@@ -1,27 +1,19 @@
 <?php
 
-/**
- * This file is part of the Nette Framework (http://nette.org)
- * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
- */
-
 namespace Instante\CMS\Latte;
 
-use Instante\CMS\DI\EditorExtension;
 use Latte\Engine;
 use Latte\Macros\MacroSet;
 use Latte\MacroNode;
 use Latte\PhpWriter;
 use Latte\CompileException;
-use Nette\Utils\Strings;
 
 
 /**
  * Macros for Nette\Application\UI.
  *
- * - {link destination ...} control link
- * - {plink destination ...} presenter link
- * - {snippet ?} ... {/snippet ?} control snippet
+ * - {icms.text $ident}default text{/icms.text}
+ * - <element n:inner-icms.text="$ident">default text</element>
  */
 final class EditorMacros extends MacroSet
 {
@@ -35,7 +27,8 @@ final class EditorMacros extends MacroSet
     /**
      * EditorMacros constructor.
      */
-    public function __construct(Engine $engine) {
+    public function __construct(Engine $engine)
+    {
         parent::__construct($engine->getCompiler());
         $this->engine = $engine;
     }
@@ -45,6 +38,7 @@ final class EditorMacros extends MacroSet
         /** @var EditorMacros $me */
         $me = new static($engine);
         $me->addMacro('icms.text', [$me, 'macroTextBegin'], [$me, 'macroTextEnd']);
+        return $me;
     }
 
     /**
@@ -53,7 +47,7 @@ final class EditorMacros extends MacroSet
      */
     public function finalize()
     {
-        return ['$_icmsetr = $this->getEngine()->getFilters()[\''.self::EDITABLE_TEXT_RESOLVER_FILTER.'\'];'];
+        return ['$_icmsetr = $this->getEngine()->getFilters()[\'' . self::EDITABLE_TEXT_RESOLVER_FILTER . '\'];'];
     }
 
     /**
@@ -62,7 +56,7 @@ final class EditorMacros extends MacroSet
     public function macroTextBegin(MacroNode $node, PhpWriter $writer)
     {
         if ($node->prefix !== MacroNode::PREFIX_INNER && $node->prefix !== NULL) {
-            throw new CompileException('icms.text macro currently doesn\'t support n:icms-text form, you may only use n:inner-icms.text');
+            throw new CompileException('icms.text macro currently doesn\'t support n:icms.text form, you may only use n:inner-icms.text');
         }
         if ($this->inMacroText) {
             throw new \LogicException('icms-text macros cannot be nested.');

@@ -12,7 +12,6 @@ namespace Instante\CMS\Editor;
 use Kdyby\Doctrine\EntityManager;
 use Nette\Application\BadRequestException;
 use Nette\Application\Responses\TextResponse;
-use NetteModule\MicroPresenter;
 
 final class EditorApi
 {
@@ -22,18 +21,25 @@ final class EditorApi
     /**
      * EditorApi constructor.
      * @param EntityManager $em
-     * @param string $action
      */
     private function __construct(EntityManager $em = NULL)
     {
         $this->em = $em;
     }
 
+    /**
+     * Creates function callback as a route handler for the extension.
+     * Redirects action parameter from route to $this->action<Action> method, like Nette's presenters.
+     *
+     * @return \Closure
+     */
     public static function getEntryPoint()
     {
-        return function(EntityManager $em,
-                        $action,
-                        $presenter) {
+        return function (
+            EntityManager $em,
+            $action,
+            $presenter
+        ) {
             $params = $presenter->getRequest()->getParameters();
             unset($params['callback']);
             unset($params['action']);
