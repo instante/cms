@@ -8,7 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Entity
  * @ORM\Table(name="icms_editable_text")
  */
-final class EditableText
+class EditableText
 {
     /**
      * @ORM\Id
