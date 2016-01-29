@@ -14,21 +14,29 @@ Installation
 
 The best way to install Instante CMS is using  [Composer](http://getcomposer.org/):
 
+1)
 ```sh
 $ composer require instante/cms
 ```
 
-Register EditorExtension in Nette config:
+2) Register EditorExtension in Nette config:
 extensions:
     icns: Instante\CMS\DI\EditorExtension
 
-Register route for Editor Api in Nette router
+3) Register route for Editor Api in Nette router
 $router[] = Instante\CMS\DI\EditorExtension::createRoute();
 
-Copy files from assets directory to your project and register instante/icmsEditor to requirejs
+4) Copy files from assets directory to your project and register instante/icmsEditor to requirejs
 
-Setup instante/icmsEditor in presenter
+5) Setup instante/icmsEditor in presenter
 $this->jsModulesContainer->useModule('instante/icmsEditor', [
             'saveUrl'  => $this->getHttpRequest()->url->getBaseUrl() . "icms-api/save",    // url registered in Router and its save action
             'autoInit' => TRUE,                     // or you can call instante/icmsEditor init() manually
         ]);
+
+6) Link less files to page
+
+7) Load font awesome
+ <link href="http://netdna.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.css" rel="stylesheet">
+
+8) Move pen.png to your www dir and check icms.less due to img path
