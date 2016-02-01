@@ -71,8 +71,7 @@ final class EditorMacros extends MacroSet
         }
         $this->inMacroText = TRUE;
         $output = 'echo \'<div data-icms="container" class="' . self::EDITABLE_TEXT_CONTAINER_CLASS . '">\';';
-        $output .= 'echo \'<div class="' . self::EDITABLE_TEXT_CONTENT_CLASS . '" data-icms="content" data-icms-id="\' . %node.word . \'">\';$icmstext = $_icmsetr(%node.word); if ($icmstext !== NULL) { echo %modify( $icmstext ); } else {} unset ($icmstext);echo "</div>";';
-        $output .= 'if($_icmsea(%node.word)===TRUE){echo  \'<button data-icms-button="edit" class="' . self::EDITABLE_TEXT_EDIT_BUTTON_CLASS . '">' . self::BUTTON_TEXT . '</button>\';}';
+        $output .= 'echo \'<div class="' . self::EDITABLE_TEXT_CONTENT_CLASS . '" data-icms="content" data-icms-id="\' . %node.word . \'">\';$icmstext = $_icmsetr(%node.word); if ($icmstext !== NULL) { echo %modify( $icmstext ); } else {';
 
         return $writer->write($output);
     }
@@ -80,6 +79,6 @@ final class EditorMacros extends MacroSet
     public function macroTextEnd(MacroNode $node, PhpWriter $writer)
     {
         $this->inMacroText = FALSE;
-        return $writer->write('echo "</div>"');
+        return $writer->write('} unset ($icmstext);echo "</div>";if($_icmsea(%node.word)===TRUE){echo  \'<button data-icms-button="edit" class="' . self::EDITABLE_TEXT_EDIT_BUTTON_CLASS . '">' . self::BUTTON_TEXT . '</button>\';}echo "</div>"');
     }
 }
