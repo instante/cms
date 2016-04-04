@@ -9,13 +9,10 @@
 namespace Instante\CMS\Editor;
 
 
-use Kdyby\Doctrine\EntityManager;
 use Nette\Application\BadRequestException;
 use Nette\Application\IResponse;
-use Nette\Application\Request;
 use Nette\Application\Responses\JsonResponse;
 use Nette\Application\Responses\TextResponse;
-use Nette\Http\IRequest;
 use NetteModule\MicroPresenter;
 
 final class EditorApi
@@ -75,5 +72,10 @@ final class EditorApi
     private function actionLoad($params)
     {
         return new TextResponse($this->editableFacade->getText($params['ident']));
+    }
+
+    private function actionSave($params)
+    {
+        return new JsonResponse($this->editableFacade->setText($params['ident'], $params['text']));
     }
 }

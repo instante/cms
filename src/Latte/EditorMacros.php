@@ -2,12 +2,12 @@
 
 namespace Instante\CMS\Latte;
 
-use Latte\Engine;
-use Latte\Macros\MacroSet;
-use Latte\MacroNode;
-use Latte\PhpWriter;
+use Instante\CMS\Editor\IICMSAuthorizator;
 use Latte\CompileException;
-
+use Latte\Engine;
+use Latte\MacroNode;
+use Latte\Macros\MacroSet;
+use Latte\PhpWriter;
 
 /**
  * Macros for Nette\Application\UI.
@@ -17,37 +17,45 @@ use Latte\CompileException;
  */
 final class EditorMacros extends MacroSet
 {
+    const EDITABLE_TEXT_AUTHORIZATOR = 'icms_editable_autorizator';
     const EDITABLE_TEXT_RESOLVER_FILTER = 'icms_editable_text_resolver';
-
+    const EDITABLE_TEXT_CONTAINER_CLASS = 'icms-editable';
+    const EDITABLE_TEXT_CONTENT_CLASS = 'icms-editable-content';
+    const EDITABLE_TEXT_EDIT_BUTTON_CLASS = 'icms-editable-button-edit';
+    const BUTTON_TEXT = 'Upravit';
     /** @var Engine */
     private $engine;
-
+    /** @var IICMSAuthorizator */
+    private $authorizator;
     private $inMacroText = FALSE;
 
     /**
      * EditorMacros constructor.
      */
-    public function __construct(Engine $engine)
+    public function __construct(Engine $engine, IICMSAuthorizator $authorizator)
     {
         parent::__construct($engine->getCompiler());
         $this->engine = $engine;
+        $this->authorizator = $authorizator;
     }
 
-    public static function install(Engine $engine)
+    public static function install(Engine $engine, IICMSAuthorizator $authorizator)
     {
         /** @var EditorMacros $me */
-        $me = new static($engine);
+        $me = new static($engine, $authorizator);
         $me->addMacro('icms.text', [$me, 'macroTextBegin'], [$me, 'macroTextEnd']);
         return $me;
     }
 
     /**
      * Finishes template parsing.
+     *
      * @return array(prolog, epilog)
      */
     public function finalize()
     {
-        return ['$_icmsetr = $this->getEngine()->getFilters()[\'' . self::EDITABLE_TEXT_RESOLVER_FILTER . '\'];'];
+        return ['$_icmsetr = $this->getEngine()->getFilters()[\'' . self::EDITABLE_TEXT_RESOLVER_FILTER . '\'];
+        $_icmsea = $this->getEngine()->getFilters()[\'' . self::EDITABLE_TEXT_AUTHORIZATOR . '\'];'];
     }
 
     /**
@@ -62,12 +70,15 @@ final class EditorMacros extends MacroSet
             throw new \LogicException('icms-text macros cannot be nested.');
         }
         $this->inMacroText = TRUE;
-        return $writer->write('$icmstext = $_icmsetr(%node.word); if ($icmstext !== NULL) { echo %modify( $icmstext; ); } else {');
+        $output = 'echo \'<div data-icms="container" class="' . self::EDITABLE_TEXT_CONTAINER_CLASS . '">\';';
+        $output .= 'echo \'<div class="' . self::EDITABLE_TEXT_CONTENT_CLASS . '" data-icms="content" data-icms-id="\' . %node.word . \'">\';$icmstext = $_icmsetr(%node.word); if ($icmstext !== NULL) { echo %modify( $icmstext ); } else {';
+
+        return $writer->write($output);
     }
 
     public function macroTextEnd(MacroNode $node, PhpWriter $writer)
     {
         $this->inMacroText = FALSE;
-        return $writer->write('} unset ($icmstext);');
+        return $writer->write('} unset ($icmstext);echo "</div>";if($_icmsea(%node.word)===TRUE){echo  \'<button data-icms-button="edit" class="' . self::EDITABLE_TEXT_EDIT_BUTTON_CLASS . '">' . self::BUTTON_TEXT . '</button>\';}echo "</div>"');
     }
 }

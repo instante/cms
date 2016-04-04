@@ -59,14 +59,15 @@ final class EditorExtension extends CompilerExtension implements IEntityProvider
         $this->getContainerBuilder()
             ->getDefinition('latte.latteFactory')
             ->addSetup('?->onCompile[] = function() use (?) { ' . EditorMacros::class
-                . '::install(?); }', array('@self', '@self', '@self'))
+                . '::install(?,?); }', ['@self', '@self', '@self', $this->prefix('@ICMSAuthorizator')])
             ->addSetup('addFilter', [
                 EditorMacros::EDITABLE_TEXT_RESOLVER_FILTER,
                 [$this->prefix('@' . self::EDITABLE_FACADE_SERVICE), 'getText'],
+            ])
+            ->addSetup('addFilter', [
+                EditorMacros::EDITABLE_TEXT_AUTHORIZATOR,
+                [$this->prefix('@ICMSAuthorizator'), 'canWrite'],
             ]);
-        $this->getContainerBuilder()
-            ->addDefinition($this->prefix('editorFacade'))
-            ->setClass('Instante\CMS\Editor\EditableFacade');
     }
 
     /**
